@@ -1,11 +1,5 @@
 [[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
-
-## Redirect API calls
-[[redirects]]
   from = "/v1/api/*"
-  to = "https://predictram-crm-backend.azurewebsites.net/:splat"
+  to = "https://predictramcrm-backend.onrender.com/v1/api/:splat"
   status = 200
   force = true

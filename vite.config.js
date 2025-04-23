@@ -37,7 +37,7 @@ export default defineConfig({
     ],
   },
   server: {
-    port: 3030,
+    port: 4040,
     proxy: {
       '/v1/api': {
         target: 'http://localhost:8080/',
@@ -54,7 +54,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 3030,
+    port: 4040,
   },
   // base: '.',
   // root: 'src',

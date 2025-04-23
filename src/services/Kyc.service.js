@@ -7,8 +7,12 @@ export default class KycService {
     return doPost(`${KYC_URL}/esign`);
   }
 
-  static async ekyc() {
-    return doPost(`${KYC_URL}/ekyc`);
+  static async ekyc(data) {
+    return doPost(`${KYC_URL}/ekyc`, data);
+  }
+
+  static async ekycVerify(data) {
+    return doPost(`${KYC_URL}/ekyc-verify`, data);
   }
 
   static async ekycReport(document_id) {

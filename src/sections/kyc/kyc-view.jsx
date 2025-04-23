@@ -6,82 +6,35 @@ import Typography from '@mui/material/Typography';
 import Logo from 'src/components/logo';
 import { Grid, Stack } from '@mui/material';
 import KycService from 'src/services/Kyc.service';
-import useScript from 'src/utils/useScript';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
-import UserService from 'src/services/User.service';
+import KYCVerifyModel from 'src/components/modal/kyc/kyc-verify-modal';
 import { useState } from 'react';
-import MainLoader from 'src/components/loader/main-loader';
+// import { useState } from 'react';
+// import MainLoader from 'src/components/loader/main-loader';
 
 // ----------------------------------------------------------------------
-/* eslint-disable */
+
 export default function KycView() {
-  const [loading, setLoading] = useState(false);
+  const [modelOpen, setModelopen] = useState(false);
+
   const user = useSelector((state) => state?.user?.details);
 
   const ekyc = user?.kyc?.ekyc;
   const esign = user?.kyc?.esign;
 
-  useScript('https://app.digio.in/sdk/v11/digio.js');
-
   const handelEsign = async () => {
-    const { data } = await KycService.esign();
-    var options = {
-      environment: 'sandbox',
-      callback: async function (response) {
-        setLoading(true);
-        try {
-          if (response.hasOwnProperty('error_code')) {
-            throw new Error(response?.message);
-          }
-          await UserService.put(user?.id, { esign: true, esignDocid: data?.id });
-          window.location.reload();
-        } catch (e) {
-          toast.error('e-Sign Failed');
-        } finally {
-          setLoading(false);
-        }
-      },
-      logo: 'https://www.mylogourl.com/image.jpeg',
-      theme: {
-        primaryColor: '#AB3498',
-        secondaryColor: '#000000',
-      },
-    };
-
-    const digio = new Digio(options);
-    digio.init();
-    digio.submit(data?.id, data?.signing_parties[0]?.identifier, data?.access_token?.id);
+    try {
+      const { data } = await KycService.esign();
+      window.location.href = data?.requests?.[0]?.signing_url;
+    } catch (err) {
+      console.log(err);
+      toast.error('e-Sign Failed');
+    }
   };
 
   const handelEKYC = async () => {
-    const { data } = await KycService.ekyc();
-    var options = {
-      environment: 'sandbox',
-      callback: async function (response) {
-        setLoading(true);
-        try {
-          if (response.hasOwnProperty('error_code')) {
-            throw new Error(response?.message);
-          }
-          await UserService.put(user?.id, { ekyc: true, ekycDocid: data?.id });
-          window.location.reload();
-        } catch (e) {
-          toast.error('e-KYC Failed');
-        } finally {
-          setLoading(false);
-        }
-      },
-      logo: 'https://www.mylogourl.com/image.jpeg',
-      theme: {
-        primaryColor: '#AB3498',
-        secondaryColor: '#000000',
-      },
-    };
-
-    const digio = new Digio(options);
-    digio.init();
-    digio.submit(data?.id, data?.customer_identifier, data?.access_token?.id);
+    setModelopen(true);
   };
 
   const renderHeader = (
@@ -112,12 +65,13 @@ export default function KycView() {
     </Button>
   );
 
-  console.log(loading);
-  if (loading) {
-    return <MainLoader />;
-  }
+  // console.log(loading);
+  // if (loading) {
+  //   return <MainLoader />;
+  // }
   return (
     <>
+      <KYCVerifyModel handleClose={() => setModelopen(false)} open={modelOpen} />
       {renderHeader}
 
       <Container>

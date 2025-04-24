@@ -1,4 +1,4 @@
-import { doGet, doPost } from 'src/utils/apiCallers';
+import { doPost } from 'src/utils/apiCallers';
 
 import { KYC_URL } from 'src/config/api.config';
 
@@ -15,23 +15,23 @@ export default class KycService {
     return doPost(`${KYC_URL}/ekyc-verify`, data);
   }
 
-  static async ekycReport(document_id) {
-    return doGet(
-      `${KYC_URL}/ekyc/report`,
-      { document_id },
-      {
-        responseType: 'blob',
-      }
-    );
-  }
+  // static async ekycReport(document_id) {
+  //   return doGet(
+  //     `${KYC_URL}/ekyc/report`,
+  //     { document_id },
+  //     {
+  //       responseType: 'blob',
+  //     }
+  //   );
+  // }
 
-  static async esignDoc(document_id) {
-    return doGet(
-      `${KYC_URL}/esign/doc`,
-      { document_id },
-      {
-        responseType: 'blob',
-      }
-    );
-  }
+  // static async esignDoc(document_id) {
+  //   return doGet(
+  //     `${KYC_URL}/esign/doc`,
+  //     { document_id },
+  //     {
+  //       responseType: 'blob',
+  //     }
+  //   );
+  // }
 }

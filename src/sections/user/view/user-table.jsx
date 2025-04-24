@@ -14,12 +14,14 @@ import UserService from 'src/services/User.service';
 import BaseTable from 'src/components/table/BaseTable';
 import Iconify from 'src/components/iconify';
 import AccessControl from 'src/components/Accesscontrol';
-import KycService from 'src/services/Kyc.service';
-import downloadBase64Pdf from 'src/utils/downloadBase64Pdf';
+import KYCDetailsShowModel from 'src/components/modal/kyc/kyc-details-show';
+import { useState } from 'react';
 
 // ----------------------------------------------------------------------
 
 export default function UserTable({ filterQuery, setFilterQuery }) {
+  const [kycData, setKycData] = useState(null);
+
   const tableFormat = [
     {
       label: 'Name',
@@ -56,71 +58,72 @@ export default function UserTable({ filterQuery, setFilterQuery }) {
     select: (res) => res?.data || [],
   });
 
-  const downloadKYCReport = async (ekycDocid) => {
-    const response = await KycService.ekycReport(ekycDocid);
-    downloadBase64Pdf(`kyc_report_${new Date().getTime()}.pdf`, response);
-  };
-
-  const downloadSignedDoc = async (esignDocid) => {
-    const response = await KycService.esignDoc(esignDocid);
-    downloadBase64Pdf(`esign_doc_${new Date().getTime()}.pdf`, response);
+  const openSignedDoc = async (link) => {
+    window.open(link, '_blank');
   };
 
   return (
-    <BaseTable
-      filter={filterQuery}
-      tableData={data?.user || []}
-      loading={isLoading}
-      tableDataFormat={tableFormat}
-      setFilter={setFilterQuery}
-      filterables={['firstName', 'lastName', 'email']}
-      customDocCount={data?.total}
-      customPagination
-      actions={[
-        (d) => {
-          console.log(d);
-          return (
-            <AccessControl accepted_roles={ROLES.ADMIN}>
-              {d?.kyc?.ekycDocid ? (
-                <MenuItem onClick={() => downloadKYCReport(d?.kyc?.ekycDocid)}>
-                  <Iconify icon="ic:round-download" sx={{ mr: 2 }} />
-                  Download KYC Report
-                </MenuItem>
-              ) : (
-                <MenuItem>KYC not done</MenuItem>
-              )}
-            </AccessControl>
-          );
-        },
-        (d) => {
-          console.log(d);
-          return (
-            <AccessControl accepted_roles={ROLES.ADMIN}>
-              {d?.kyc?.esignDocid ? (
-                <MenuItem onClick={() => downloadSignedDoc(d?.kyc?.esignDocid)}>
-                  <Iconify icon="ic:round-download" sx={{ mr: 2 }} />
-                  Download Signed Document
-                </MenuItem>
-              ) : (
-                <MenuItem>Document Not Signed</MenuItem>
-              )}
-            </AccessControl>
-          );
-        },
-      ]}
-      // actions={
-      //   <div>
-      // <MenuItem>
-      //   <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
-      //   Edit
-      // </MenuItem>
+    <>
+      <KYCDetailsShowModel
+        kycDetails={kycData}
+        handleClose={() => setKycData(null)}
+        open={!!kycData}
+      />
+      <BaseTable
+        filter={filterQuery}
+        tableData={data?.user || []}
+        loading={isLoading}
+        tableDataFormat={tableFormat}
+        setFilter={setFilterQuery}
+        filterables={['firstName', 'lastName', 'email']}
+        customDocCount={data?.total}
+        customPagination
+        actions={[
+          (d) => {
+            console.log(d);
+            return (
+              <AccessControl accepted_roles={(ROLES.ADMIN, ROLES.SUPER_ADMIN)}>
+                {d?.kyc?.ekycInfo ? (
+                  <MenuItem onClick={() => setKycData(d?.kyc?.ekycInfo)}>
+                    <Iconify icon="ic:baseline-remove-red-eye" sx={{ mr: 2 }} />
+                    View KYC Data
+                  </MenuItem>
+                ) : (
+                  <MenuItem>KYC not done</MenuItem>
+                )}
+              </AccessControl>
+            );
+          },
+          (d) => {
+            console.log(d);
+            return (
+              <AccessControl accepted_roles={(ROLES.ADMIN, ROLES.SUPER_ADMIN)}>
+                {d?.kyc?.esignInfo ? (
+                  <MenuItem onClick={() => openSignedDoc(d?.kyc?.esignInfo?.document?.signed_url)}>
+                    <Iconify icon="ic:baseline-remove-red-eye" sx={{ mr: 2 }} />
+                    View Signed Document
+                  </MenuItem>
+                ) : (
+                  <MenuItem>Document Not Signed</MenuItem>
+                )}
+              </AccessControl>
+            );
+          },
+        ]}
+        // actions={
+        //   <div>
+        // <MenuItem>
+        //   <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
+        //   Edit
+        // </MenuItem>
 
-      //     <MenuItem sx={{ color: 'error.main' }}>
-      //       <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
-      //       Delete
-      //     </MenuItem>
-      //   </div>
-      // }
-    />
+        //     <MenuItem sx={{ color: 'error.main' }}>
+        //       <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
+        //       Delete
+        //     </MenuItem>
+        //   </div>
+        // }
+      />
+    </>
   );
 }
